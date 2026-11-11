@@ -13,14 +13,22 @@ single RTX 3090. Data: benchmark toy preprocessed set, reduction quality ρ = 0.
   residuals). Deterministic, one fit per (h, secret).
 - `results_modaware_em.csv` — exploratory: same IRLS but residuals computed mod q
   (centered) with unwrap-refit each iteration. Not a registered baseline.
+- `b3_results.csv` — B3: Cool&Cruel attack (repo implementation, README demo
+  params; bf_dim=53 cruel bits per `describe`, RLWE window 49, brute force up to
+  full h, same 20-min budget). One run per (h, secret).
 
 ## Results
 
-| method | h=6 | h=8 | h=10 | cost/secret |
-|---|---|---|---|---|
-| B1 transformer | 3/15 (only secret 0, all 3 seeds) | 0/15 | 0/15 | ~7–20 min GPU |
-| B2 Tukey (real line) | 0/5 | 0/5 | 0/5 | ~1 s CPU |
-| mod-aware IRLS | 1/5 (secret 0) | 0/5 | 0/5 | ~2 s CPU |
+| method | h=6 | h=8 | h=10 | h=12 | cost/secret |
+|---|---|---|---|---|---|
+| B1 transformer | 3/15 (only secret 0, all 3 seeds) | 0/15 | 0/15 | — | ~7–20 min GPU |
+| B2 Tukey (real line) | 0/5 | 0/5 | 0/5 | 0/5 | ~1 s CPU |
+| mod-aware IRLS | 1/5 (secret 0) | 0/5 | 0/5 | 0/5 | ~2 s CPU |
+| B3 Cool&Cruel | 5/5 | 4/5 | 4/5 | 5/5 | 1 s – 10 min GPU |
+
+B3's two failures (h8 secret 3, h10 secret 2) are not at the highest h: CC's cost
+is exponential in how many secret ones land in the cruel window, which varies by
+secret, not monotonically in h.
 
 Verification for all methods: residual std on original (unreduced) samples < 2σ,
 never reading the true secret (same rule as `SecretCheck.match_secret`).
