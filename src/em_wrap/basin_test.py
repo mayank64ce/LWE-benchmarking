@@ -45,7 +45,9 @@ def main():
         args.secret_dir, f"secret_{args.hamming}_{args.secret_seed}.npy")
     ).flatten().astype(float)
 
-    rng = np.random.RandomState(0)
+    # Seed depends on (h, secret_seed) so different secrets get independent
+    # flip positions (a fixed seed would correlate results across secrets).
+    rng = np.random.RandomState(1000 * args.hamming + args.secret_seed)
     print(f"h{args.hamming}_s{args.secret_seed}:", end=" ")
     for flips in range(args.max_flips + 1):
         wins, trials = 0, (1 if flips == 0 else args.n_trials)

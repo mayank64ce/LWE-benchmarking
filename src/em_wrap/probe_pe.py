@@ -42,15 +42,30 @@ def pe_scores(checkpoint_path, n):
     }
 
 
-def auc_and_ranks(score, secret):
-    """Sign-agnostic AUC and (median, max) rank of the true bits."""
+def auc_and_ranks(score, secret, n_perms=2000, rng_seed=123):
+    """Sign-agnostic AUC, (median, max) rank of true bits, and permutation p.
+
+    Because we take max(auc, 1-auc), the null expectation is well above 0.5
+    (with h positives out of N the null mean is ~0.6). So we also report a
+    permutation p-value: the fraction of random relabelings whose
+    sign-agnostic AUC is at least as large as the observed one. That is the
+    honest 'is there any signal' number.
+    """
+    def sa_auc(s):
+        pos, neg = score[s == 1], score[s == 0]
+        a = (pos[:, None] > neg[None, :]).mean()
+        return max(a, 1 - a)
+
+    auc = sa_auc(secret)
+    rng = np.random.RandomState(rng_seed)
+    null = np.array([sa_auc(rng.permutation(secret)) for _ in range(n_perms)])
+    p_value = float((null >= auc).mean())
+
     pos, neg = score[secret == 1], score[secret == 0]
-    auc = (pos[:, None] > neg[None, :]).mean()
-    flip = auc < 0.5
-    auc = max(auc, 1 - auc)
+    flip = (pos[:, None] > neg[None, :]).mean() < 0.5
     order = np.argsort(score) if flip else np.argsort(-score)
     ranks = np.where(np.isin(order, np.where(secret == 1)[0]))[0] + 1
-    return round(float(auc), 2), int(np.median(ranks)), int(ranks.max())
+    return round(float(auc), 2), int(np.median(ranks)), int(ranks.max()), round(p_value, 3)
 
 
 def zscore(x):
