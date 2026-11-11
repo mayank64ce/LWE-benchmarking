@@ -1,0 +1,21 @@
+h6_s0: 0flips:1/1  1flips:20/20  2flips:19/20  3flips:13/20  4flips:11/20  5flips:4/20  6flips:1/20  7flips:1/20  8flips:0/20  
+h6_s1: 0flips:1/1  1flips:20/20  2flips:19/20  3flips:12/20  4flips:13/20  5flips:6/20  6flips:0/20  7flips:3/20  8flips:0/20  
+h6_s2: 0flips:1/1  1flips:20/20  2flips:20/20  3flips:16/20  4flips:4/20  5flips:2/20  6flips:3/20  7flips:1/20  8flips:0/20  
+h6_s3: 0flips:1/1  1flips:20/20  2flips:19/20  3flips:15/20  4flips:11/20  5flips:6/20  6flips:1/20  7flips:0/20  8flips:1/20  
+h6_s4: 0flips:1/1  1flips:20/20  2flips:20/20  3flips:15/20  4flips:10/20  5flips:3/20  6flips:1/20  7flips:0/20  8flips:0/20  
+h8_s0: 0flips:1/1  1flips:20/20  2flips:14/20  3flips:14/20  4flips:6/20  5flips:3/20  6flips:3/20  7flips:0/20  8flips:0/20  
+h8_s1: 0flips:1/1  1flips:20/20  2flips:20/20  3flips:14/20  4flips:11/20  5flips:3/20  6flips:1/20  7flips:2/20  8flips:0/20  
+h8_s2: 0flips:1/1  1flips:20/20  2flips:20/20  3flips:14/20  4flips:10/20  5flips:4/20  6flips:3/20  7flips:0/20  8flips:0/20  
+h8_s3: 0flips:1/1  1flips:20/20  2flips:19/20  3flips:15/20  4flips:11/20  5flips:4/20  6flips:2/20  7flips:1/20  8flips:0/20  
+h8_s4: 0flips:1/1  1flips:20/20  2flips:17/20  3flips:17/20  4flips:9/20  5flips:6/20  6flips:2/20  7flips:0/20  8flips:0/20  
+h10_s0: 0flips:1/1  1flips:20/20  2flips:17/20  3flips:15/20  4flips:8/20  5flips:5/20  6flips:3/20  7flips:1/20  8flips:0/20  
+h10_s1: 0flips:1/1  1flips:20/20  2flips:19/20  3flips:16/20  4flips:7/20  5flips:9/20  6flips:4/20  7flips:1/20  8flips:0/20  
+h10_s2: 0flips:1/1  1flips:20/20  2flips:19/20  3flips:14/20  4flips:8/20  5flips:8/20  6flips:3/20  7flips:1/20  8flips:2/20  
+h10_s3: 0flips:1/1  1flips:20/20  2flips:19/20  3flips:18/20  4flips:8/20  5flips:8/20  6flips:5/20  7flips:0/20  8flips:1/20  
+h10_s4: 0flips:1/1  1flips:20/20  2flips:17/20  3flips:13/20  4flips:10/20  5flips:4/20  6flips:2/20  7flips:1/20  8flips:0/20  
+h12_s0: 0flips:1/1  1flips:20/20  2flips:19/20  3flips:16/20  4flips:12/20  5flips:6/20  6flips:4/20  7flips:1/20  8flips:1/20  
+h12_s1: 0flips:1/1  1flips:20/20  2flips:17/20  3flips:16/20  4flips:8/20  5flips:6/20  6flips:0/20  7flips:1/20  8flips:0/20  
+h12_s2: 0flips:1/1  1flips:20/20  2flips:19/20  3flips:14/20  4flips:9/20  5flips:4/20  6flips:4/20  7flips:0/20  8flips:0/20  
+h12_s3: 0flips:1/1  1flips:20/20  2flips:20/20  3flips:14/20  4flips:10/20  5flips:1/20  6flips:6/20  7flips:0/20  8flips:1/20  
+h12_s4: 0flips:1/1  1flips:20/20  2flips:18/20  3flips:15/20  4flips:10/20  5flips:7/20  6flips:5/20  7flips:0/20  8flips:0/20  
+full-grid basin test complete
