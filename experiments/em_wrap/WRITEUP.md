@@ -51,6 +51,18 @@ trace that a solver can find and fix. A wrong bit on a dead column makes the
 residual indistinguishable from uniform noise — no statistic points to the
 culprit, so that bit must be guessed.
 
+**Relation to Cool&Cruel.** The dead/strong split is the cruel/cool split of
+Nolte et al. — the same block of columns BKZ failed to reduce. We measured this
+directly: in raw coordinates our dead set is exactly columns 0–29, a contiguous
+prefix, i.e. the cruel region. The split is their discovery, not ours. What ε
+adds is a continuous per-column measurement of it: no width hyperparameter
+(CC's default bf_dim = 20 misses 10 genuinely dead columns on this dataset),
+a graded "lukewarm" band that a binary cutoff cannot express (and that drives
+the hardness score in §4), and a definition that transfers to settings where
+the hard region is not a clean prefix. The novelty claimed here is the solver
+(EM, which recovers secrets CC misses on the same split) and the per-secret
+predictability — not the split itself.
+
 **Algorithm** (`src/em_wrap/deadcore_em.py`): enumerate patterns of ≤ 2 ones over
 the ~30 dead columns in ascending weight (ε-ordered); from each seed run a
 mod-aware EM — E-step: unwrap b using the current estimate's residuals mod q;
