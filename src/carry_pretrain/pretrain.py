@@ -84,6 +84,26 @@ class DualAngularEncoder(Encoder):
         return head
 
 
+class HybridEncoder(DualAngularEncoder):
+    """Arm D: hybrid of C and B — dual circles AND the carry head. The two
+    tricks act in different places (targets vs an extra output), so they
+    compose without interfering."""
+
+    def __init__(self, params, n_k_classes):
+        super().__init__(params)
+        self.k_head = nn.Linear(params.enc_emb_dim, n_k_classes, bias=False)
+
+    def forward(self, A):
+        tok_emb = self.tok_emb(A)
+        pos = torch.arange(0, A.shape[1], device=A.device).unsqueeze(0)
+        x = self.drop(tok_emb + self.pos_emb(pos))
+        for layer in self.layers:
+            x = layer(x)
+        x = self.ln_f(x)
+        pooled = torch.max(x, dim=1)[0]
+        return self.head(pooled), self.k_head(pooled)
+
+
 # ---------------------------------------------------------------------------
 # Angular encoding helpers (same convention as the repo's AngularEncoder).
 # ---------------------------------------------------------------------------
@@ -107,7 +127,10 @@ def decode_circle(xy, modulus):
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("--arm", choices=["A", "B", "C"], required=True)
+    p.add_argument("--arm", choices=["A", "B", "C", "Cp", "D"], required=True,
+                   help="A=plain b; B=+carry head; C=aux modulus (Kikuchi); "
+                        "Cp=ablation, dual inputs but mod-q labels only; "
+                        "D=hybrid C+B (label switch AND carry head)")
     p.add_argument("--npz", required=True, help="output of make_synthetic_labels.py")
     p.add_argument("--grid_dir", required=True, help="dir with train_A.npy")
     p.add_argument("--out_dir", required=True)
@@ -175,8 +198,10 @@ def main():
         model = Encoder(mp)
     elif args.arm == "B":
         model = CarryEncoder(mp, n_k_classes)
-    else:
+    elif args.arm in ("C", "Cp"):
         model = DualAngularEncoder(mp)
+    else:  # D
+        model = HybridEncoder(mp, n_k_classes)
     model = model.to(dev)
 
     opt = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=0.001)
@@ -184,8 +209,8 @@ def main():
     ce = nn.CrossEntropyLoss()
 
     def encode_inputs(rows):
-        """A row of X -> angular tokens. Arm C gets both circles (4-dim)."""
-        if args.arm == "C":
+        """A row of X -> angular tokens. Dual-circle arms get 4-dim inputs."""
+        if args.arm in ("C", "Cp", "D"):
             return torch.cat([to_circle(rows, q), to_circle(rows, K * q)], dim=-1)
         return to_circle(rows, q)
 
@@ -198,7 +223,7 @@ def main():
     def evaluate():
         model.eval()
         out = model(eval_X)
-        if args.arm == "B":
+        if args.arm in ("B", "D"):
             out = out[0]
         pred = decode_circle(out[:, :2], q).cpu()
         acc = (pred == eval_true).float().mean().item()
@@ -234,16 +259,29 @@ def main():
             out_b, out_k = model(xb)
             loss = mse(out_b, target) + args.carry_weight * ce(out_k, kb)
 
-        else:  # arm C: per-sample label switch, Eq. (2) of the paper
+        elif args.arm == "Cp":
+            # Ablation: dual-circle inputs like C, but ONLY mod-q labels.
+            # Isolates how much of arm C's gain is the richer input encoding.
+            target = to_circle(b_t[j, rows], q).to(dev)
+            loss = mse(model(xb)[:, :2], target)
+
+        else:  # arms C and D: per-sample label switch, Eq. (2) of the paper
+            out = model(xb)
+            if args.arm == "D":
+                out, out_k = out
+            # (batch, 4): dims 0:2 = mod q circle, dims 2:4 = mod Kq circle
             use_aux = torch.from_numpy(
                 rng.random(args.batch_size) < args.aux_r)
-            out = model(xb)  # (batch, 4): dims 0:2 = mod q, dims 2:4 = mod Kq
             t_q = to_circle(b_t[j, rows], q).to(dev)
             t_K = to_circle(bK_t[j, rows], K * q).to(dev)
             # Loss on the selected circle only, per sample.
             sel = use_aux.to(dev)
             loss = (mse(out[~sel, :2], t_q[~sel]) * (~sel).float().mean()
                     + mse(out[sel, 2:], t_K[sel]) * sel.float().mean())
+            if args.arm == "D":
+                # Hybrid: add our carry-head loss on top of the label switch.
+                kb = k_t[j, rows].to(dev)
+                loss = loss + args.carry_weight * ce(out_k, kb)
 
         opt.zero_grad(set_to_none=True)
         loss.backward()
