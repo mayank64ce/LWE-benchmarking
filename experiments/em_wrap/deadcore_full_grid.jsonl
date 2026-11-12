@@ -1,0 +1,21 @@
+{"matched": true, "h": 6, "secret_seed": 0, "winning_pattern": [], "n_runs": 1, "wall_sec": 8.9, "hard_set_size": 30, "recovered_support": [18, 40, 41, 44, 46, 77]}
+{"matched": true, "h": 6, "secret_seed": 1, "winning_pattern": [26, 36], "n_runs": 331, "wall_sec": 2811.4, "hard_set_size": 30, "recovered_support": [15, 26, 36, 45, 65, 69]}
+{"matched": true, "h": 6, "secret_seed": 2, "winning_pattern": [20, 17], "n_runs": 277, "wall_sec": 2322.9, "hard_set_size": 30, "recovered_support": [17, 20, 27, 39, 44, 78]}
+{"matched": true, "h": 6, "secret_seed": 3, "winning_pattern": [34, 10], "n_runs": 63, "wall_sec": 575.5, "hard_set_size": 30, "recovered_support": [9, 10, 34, 48, 51, 54]}
+{"matched": false, "h": 6, "secret_seed": 4, "n_runs": 466, "hard_set_size": 30, "wall_sec": 5148.0}
+{"matched": false, "h": 8, "secret_seed": 0, "n_runs": 466, "hard_set_size": 30, "wall_sec": 1184.5}
+{"matched": false, "h": 8, "secret_seed": 1, "n_runs": 466, "hard_set_size": 30, "wall_sec": 558.7}
+{"matched": true, "h": 8, "secret_seed": 2, "winning_pattern": [33, 29], "n_runs": 422, "wall_sec": 501.7, "hard_set_size": 30, "recovered_support": [29, 33, 41, 46, 47, 57, 65, 76]}
+{"matched": false, "h": 8, "secret_seed": 3, "n_runs": 466, "hard_set_size": 30, "wall_sec": 543.9}
+{"matched": false, "h": 8, "secret_seed": 4, "n_runs": 466, "hard_set_size": 30, "wall_sec": 548.9}
+{"matched": false, "h": 10, "secret_seed": 0, "n_runs": 466, "hard_set_size": 30, "wall_sec": 549.3}
+{"matched": false, "h": 10, "secret_seed": 1, "n_runs": 466, "hard_set_size": 30, "wall_sec": 549.5}
+{"matched": true, "h": 10, "secret_seed": 2, "winning_pattern": [16], "n_runs": 7, "wall_sec": 8.5, "hard_set_size": 30, "recovered_support": [1, 16, 45, 53, 55, 57, 66, 67, 71, 75]}
+{"matched": false, "h": 10, "secret_seed": 3, "n_runs": 466, "hard_set_size": 30, "wall_sec": 541.8}
+{"matched": false, "h": 10, "secret_seed": 4, "n_runs": 466, "hard_set_size": 30, "wall_sec": 555.7}
+{"matched": false, "h": 12, "secret_seed": 0, "n_runs": 466, "hard_set_size": 30, "wall_sec": 554.9}
+{"matched": false, "h": 12, "secret_seed": 1, "n_runs": 466, "hard_set_size": 30, "wall_sec": 546.3}
+{"matched": false, "h": 12, "secret_seed": 2, "n_runs": 466, "hard_set_size": 30, "wall_sec": 549.0}
+{"matched": false, "h": 12, "secret_seed": 3, "n_runs": 466, "hard_set_size": 30, "wall_sec": 550.2}
+{"matched": false, "h": 12, "secret_seed": 4, "n_runs": 466, "hard_set_size": 30, "wall_sec": 555.0}
+deadcore full grid complete
