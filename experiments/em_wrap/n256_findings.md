@@ -9,14 +9,14 @@ Code: fork branch `em-wrap-attack`; n=256 scripts in `code/n256_*.py`.
   computed from A alone (no secret). It measures how concentrated the
   column's values are relative to the modulus q. ε≈1: values tiny compared
   to q. ε≈0: values look uniform mod q.
-- **Dead column**: ε ≤ 0.1. If the guess is wrong on a dead column, the
+- **Cruel column** (terminology of Nolte et al.; our scripts call it "dead"): ε ≤ 0.1. If the guess is wrong on a cruel column, the
   error looks like uniform noise — no statistic can point to the culprit.
-- **Strong column**: high ε. Errors there leave a visible trace, so the
+- **Cool column**: high ε. Errors there leave a visible trace, so the
   solver can find and fix them.
-- **Dead support**: how many of the secret's nonzero entries sit on dead
+- **Cruel support**: how many of the secret's nonzero entries sit on cruel
   columns. These are the entries that must be guessed by enumeration.
 - **Healing**: EM started with some entries wrong converges to the truth
-  anyway. **Slack**: how many *dead* entries the seed may get wrong and
+  anyway. **Slack**: how many *cruel* entries the seed may get wrong and
   still recover (via healing + repair sweep).
 - **Repair sweep**: after EM, try changing each single coordinate to each
   possible value and accept if the exact verifier (residual test on
@@ -30,17 +30,17 @@ Code: fork branch `em-wrap-attack`; n=256 scripts in `code/n256_*.py`.
 | secret dim | 80 (binary) | 512 (binomial) | 512 (binomial) |
 | reduction ρ | 0.783 | 0.88 | 0.67 |
 | samples used | 50k | 99k | 99k |
-| strong band | 38 cols, ε≈0.68 | 128 cols, ε≈0.88 | **none** (max ε=0.25) |
-| dead columns | 30/80 (37%) | 384/512 (75%) | 219/512 (43%) |
-| dead support | 0–2 | 5–9 (shift-dependent, min≈3) | 3–11 |
+| cool band | 38 cols, ε≈0.68 | 128 cols, ε≈0.88 | **none** (max ε=0.25) |
+| cruel columns | 30/80 (37%) | 384/512 (75%) | 219/512 (43%) |
+| cruel support | 0–2 | 5–9 (shift-dependent, min≈3) | 3–11 |
 | EM healing | works | works (one stall, repair fixes) | **fails** (even 1 missing entry) |
-| slack on dead entries | 0 (same as below) | 0 (tested at 14.5k AND 99k samples) | n/a |
-| attack verdict | **WINS** (≤466 runs/secret) | enumeration infeasible (C(384,5)·4^5) | mechanism dead |
+| slack on cruel entries | 0 (same as below) | 0 (tested at 14.5k AND 99k samples) | n/a |
+| attack verdict | **WINS** (≤466 runs/secret) | enumeration infeasible (C(384,5)·4^5) | mechanism cruel |
 
 Key Kyber-scale positives, both at log q=12:
-- Exact secret recovery in 14 s given a correct dead seed (EM healed all
-  128 strong coordinates; one stalled coordinate fixed by repair sweep).
-- Control test: seeding strong instead of dead fails — the dead/strong
+- Exact secret recovery in 14 s given a correct cruel seed (EM healed all
+  128 cool coordinates; one stalled coordinate fixed by repair sweep).
+- Control test: seeding cool instead of cruel fails — the cruel/cool
   asymmetry is real at scale, not a toy artifact.
 
 ## The feasibility rule (the actual finding)
@@ -53,36 +53,36 @@ before attacking:
    log q=28 has better ρ (0.67) but zero high-ε columns, because its huge
    modulus leaves even "reduced" values at ~0.2q. The per-column ε
    spectrum is the right lens, and nobody in the benchmark papers tracks it.
-2. **The dead support is enumerable.** Cost = C(#dead cols, dead support)
+2. **The cruel support is enumerable.** Cost = C(#cruel cols, cruel support)
    × (values per entry). Toy: C(30,≤2) fine. Kyber log q=12: C(384,5+)
    hopeless.
 
-Corollary: "more data" does not help — slack on dead entries stayed zero
+Corollary: "more data" does not help — slack on cruel entries stayed zero
 going from 14.5k to 99k samples. The wall is informational, not statistical.
 
 ## Tweaks measured or assessed
 
 - **Shift search (real, measured)**: the MLWE rotation gives 256
-  equivalent views; the dead set rotates while the secret stays fixed, so
-  dead support varies per view — measured 3–6 for one h=6 secret. Same
+  equivalent views; the cruel set rotates while the secret stays fixed, so
+  cruel support varies per view — measured 3–6 for one h=6 secret. Same
   trick CC uses. Reduces the exponent (5→3 here) but C(384,3)·4³ ≈ 6e8 EM
   runs still infeasible on one machine.
 - **Repair sweep (real, measured)**: fixes any single wrong coordinate
   after EM for ~free. Extends reach by exactly 1 coordinate, no more
   (2-missing tests all failed).
-- **ε-ordered enumeration (used at n=80)**: enumerate likelier dead
+- **ε-ordered enumeration (used at n=80)**: enumerate likelier cruel
   patterns first. Helps constants, not the exponent.
 - **GPU-batched EM (not done)**: EM is dense linear algebra; thousands of
   seeds could run in parallel. Shaves maybe 3 orders of magnitude off
   wall-clock; 6e8 runs would still need a cluster.
-- **Better reduction (not ours to run)**: shrinking the dead set directly
+- **Better reduction (not ours to run)**: shrinking the cruel set directly
   attacks the exponent. The trade "BKZ effort vs enumeration cost" is the
   interesting open curve; the SALSA authors have the preprocessing
   infrastructure to explore it.
 
 ## What to tell the SALSA team
 
-1. n=80: dead-core-seeded EM recovers secrets CC fails on, in minutes on
+1. n=80: cruel-seeded EM recovers secrets CC fails on, in minutes on
    one CPU (full grid run in progress; 4/4 at time of writing).
 2. The ε-spectrum feasibility rule, with the three-setting table above.
 3. The constructive question: their preprocessing choices directly shape

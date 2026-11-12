@@ -1,4 +1,4 @@
-# Dead-core-seeded EM: a cheap attack on reduced LWE, and a rule for when it works
+# Cruel-seeded EM: a cheap attack on reduced LWE, and a rule for when it works
 
 Mayank Kumar (UCF) — November 2026. Status: research note for discussion, toy scale.
 All code and raw results in this branch (`em-wrap-attack`); every number below is
@@ -26,7 +26,7 @@ independently drawn.
 | B1: SALSA transformer (published recipe) | 3/15* | 0/15 | 0/15 | — | 1 secret | 7–20 min GPU |
 | B2: robust regression, real line (Tukey IRLS) | 0/5 | 0/5 | 0/5 | 0/5 | 0/20 | ~1 s CPU |
 | B3: Cool&Cruel (repo implementation) | 5/5 | 4/5 | 4/5 | 5/5 | 18/20 | 1 s–10 min GPU |
-| ours: dead-core-seeded EM, weight ≤ 2 | 4/5 | 1/5 | 1/5 | 0/5 | 6/20 | 8 s–47 min CPU |
+| ours: cruel-seeded EM, weight ≤ 2 | 4/5 | 1/5 | 1/5 | 0/5 | 6/20 | 8 s–47 min CPU |
 | **B3 ∪ ours** | 5/5 | 4/5 | 5/5 | 5/5 | **19/20** | — |
 
 *B1: 15 runs = 5 secrets × 3 model seeds; only secret 0 recovered (by all 3 seeds).
@@ -43,20 +43,21 @@ resists both attacks.
 **ε-profile.** For each column j of the reduced matrix A, compute
 ε_j = |mean_i exp(2πi·A_ij/q)| — from A alone, no secret involved. ε_j measures how
 concentrated column j's values are relative to q (1 = tiny values, 0 = uniform).
-On this dataset the 80 columns split into ~38 strong (ε ≈ 0.68), ~12 lukewarm
-(0.02 < ε ≤ 0.5), ~30 dead (ε ≤ 0.02, the sampling noise floor).
+On this dataset the 80 columns split into ~38 cool (ε ≈ 0.68), ~12 lukewarm
+(0.02 < ε ≤ 0.5), ~30 cruel (ε ≤ 0.02, the sampling noise floor).
 
 **Why ε matters.** A wrong secret bit on a high-ε column leaves a statistical
-trace that a solver can find and fix. A wrong bit on a dead column makes the
+trace that a solver can find and fix. A wrong bit on a cruel column makes the
 residual indistinguishable from uniform noise — no statistic points to the
 culprit, so that bit must be guessed.
 
-**Relation to Cool&Cruel.** The dead/strong split is the cruel/cool split of
-Nolte et al. — the same block of columns BKZ failed to reduce. We measured this
-directly: in raw coordinates our dead set is exactly columns 0–29, a contiguous
-prefix, i.e. the cruel region. The split is their discovery, not ours. What ε
+**Relation to Cool&Cruel.** The terminology is Nolte et al.'s, on purpose: our
+ε-defined split identifies the same object as their cruel/cool split — the block
+of columns BKZ failed to reduce. We measured this directly: in raw coordinates
+our ε ≤ 0.02 set is exactly columns 0–29, a contiguous prefix, i.e. the cruel
+region. The split is their discovery, not ours. What ε
 adds is a continuous per-column measurement of it: no width hyperparameter
-(CC's default bf_dim = 20 misses 10 genuinely dead columns on this dataset),
+(CC's default bf_dim = 20 misses 10 genuinely cruel columns on this dataset),
 a graded "lukewarm" band that a binary cutoff cannot express (and that drives
 the hardness score in §4), and a definition that transfers to settings where
 the hard region is not a clean prefix. The novelty claimed here is the solver
@@ -64,7 +65,7 @@ the hard region is not a clean prefix. The novelty claimed here is the solver
 predictability — not the split itself.
 
 **Algorithm** (`src/em_wrap/deadcore_em.py`): enumerate patterns of ≤ 2 ones over
-the ~30 dead columns in ascending weight (ε-ordered); from each seed run a
+the ~30 cruel columns in ascending weight (ε-ordered); from each seed run a
 mod-aware EM — E-step: unwrap b using the current estimate's residuals mod q;
 M-step: Tukey-weighted least squares — then round and verify. At most 466 EM runs
 per secret, ~8 s per run, one CPU core, no GPU, no training.
@@ -80,8 +81,8 @@ Per-secret results: `deadcore_full_grid.jsonl`. Successes: h6_s0 (1 run), h6_s1
 - **Asymmetry** (`basin_matrix_h8s3_h6s1.csv`): false ones added hurt more than
   true ones missing at equal Hamming distance.
 - **What predicts failure is not distance but blur.** EM recovered one secret from
-  Hamming distance 9 (all distance on strong columns) and failed others at
-  distance 2 (on dead columns).
+  Hamming distance 9 (all distance on cool columns) and failed others at
+  distance 2 (on cruel columns).
 - **Hardness score.** Across the 20 grid secrets, the best single predictor of
   success we found is Σ(1 − ε_j) over the secret's support (total "blur mass" the
   solver must absorb beyond the seed): a single threshold separates 19/20
@@ -93,25 +94,25 @@ Per-secret results: `deadcore_full_grid.jsonl`. Successes: h6_s0 (1 run), h6_s1
 Scripts: `src/em_wrap/n256_*.py`; data: the suite's own preprocessed Kyber releases.
 
 **log q = 12 (q = 3329, ρ = 0.88, binomial secrets h 6–10, 99k samples):**
-- The ε-split exists and is sharp: 128 strong (ε ≈ 0.88) vs 384 dead.
-- Mechanism transfers: given a seed correct on the dead columns, EM heals all 128
-  strong coordinates (one stall fixed by a cheap verified one-coordinate sweep) —
-  exact secret recovered in 14 s. Control: seeding strong instead of dead fails.
-- But slack is zero: one wrong dead entry is fatal (tested at 14.5k AND 99k
+- The ε-split exists and is sharp: 128 cool (ε ≈ 0.88) vs 384 cruel.
+- Mechanism transfers: given a seed correct on the cruel columns, EM heals all 128
+  cool coordinates (one stall fixed by a cheap verified one-coordinate sweep) —
+  exact secret recovered in 14 s. Control: seeding cool instead of cruel fails.
+- But slack is zero: one wrong cruel entry is fatal (tested at 14.5k AND 99k
   samples — more data does not help; the wall is informational).
-- Secrets carry 5–9 entries on the 384 dead columns → enumeration infeasible.
-- Mitigation measured: the MLWE rotation gives 256 equivalent views; dead support
+- Secrets carry 5–9 entries on the 384 cruel columns → enumeration infeasible.
+- Mitigation measured: the MLWE rotation gives 256 equivalent views; cruel support
   varies across views (3–6 for the secret tested). Picking the best view cuts the
   exponent but C(384,3)·4³ ≈ 6·10⁸ runs still needs cluster-scale parallelism.
 
 **log q = 28 (q ≈ 1.8·10⁸, ρ = 0.67, h 13–19):**
-- Better global reduction, but *no* strong band: max ε = 0.25. With everything
+- Better global reduction, but *no* cool band: max ε = 0.25. With everything
   only mildly concentrated relative to the huge modulus, healing dies entirely —
   even a single missing entry never heals (EM at truth does stay put).
 
 **Feasibility rule** (both halves computable from A alone, before attacking):
 the attack works iff (1) a high-ε band exists — that is what EM can heal — and
-(2) the secret's dead support is small enough to enumerate. The toy setting has
+(2) the secret's cruel support is small enough to enumerate. The toy setting has
 both; each Kyber setting has exactly one. Note ρ does not capture (1): log q=28
 has better ρ but a worse ε-spectrum. The per-column ε-spectrum, which current
 benchmarks do not track, appears to be the right lens.
@@ -150,6 +151,6 @@ benchmarks do not track, appears to be the right lens.
 2. Your preprocessing choices directly shape the ε-spectrum. Would tracking ε
    during reduction (rather than only the global ρ) change which benchmark cells
    are considered attackable?
-3. Is the zero-slack phenomenon (a single wrong dead entry being unrecoverable)
+3. Is the zero-slack phenomenon (a single wrong cruel entry being unrecoverable)
    consistent with what you see in transformer training — i.e., models only
-   learning secrets whose dead support is empty?
+   learning secrets whose cruel support is empty?

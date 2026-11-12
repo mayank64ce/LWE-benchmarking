@@ -1,15 +1,17 @@
-# em_wrap: dead-core-seeded EM attack on reduced LWE
+# em_wrap: cruel-seeded EM attack on reduced LWE
 
 A CPU-only solver for BKZ-reduced LWE data: enumerate guesses on the columns
-the reduction failed to shrink (the "dead" / cruel columns), then recover the
-rest of the secret with a mod-aware EM. Full description, scoreboard, and
+the reduction failed to shrink (the cruel columns, terminology of Nolte et
+al.), then recover the rest of the secret with a mod-aware EM. Code and result
+filenames still use the legacy name "dead" for cruel (`deadcore_em.py`,
+`--dead_eps`, `deadcore_full_grid.jsonl`); the docs use cruel/cool throughout. Full description, scoreboard, and
 caveats: [`experiments/em_wrap/WRITEUP.md`](../../experiments/em_wrap/WRITEUP.md).
 Raw results live in the same directory.
 
 Terms: ε_j = |mean exp(2πi·a_j/q)| per column of reduced A, computed with no
 secret. High ε = column values small relative to q, errors there leave a trace
-EM can fix ("strong"). ε at the sampling noise floor = no trace, must guess
-("dead"). This is a continuous version of the cruel/cool split of Nolte et al.
+EM can fix ("cool"). ε at the sampling noise floor = no trace, must guess
+("cruel"). This is a continuous version of the cruel/cool split of Nolte et al.
 
 ## Files
 
@@ -19,7 +21,7 @@ Attack and core machinery:
   transform, centering, `em_fit` (E-step: unwrap b mod q against the current
   estimate; M-step: Tukey-weighted least squares), residual verification.
 - `deadcore_em.py` — **the attack**. Computes the ε-profile, enumerates seed
-  patterns of ≤ `--max_weight` ones over the dead columns (ε-ordered), runs EM
+  patterns of ≤ `--max_weight` ones over the cruel columns (ε-ordered), runs EM
   from each seed, verifies on original (unreduced) samples. ~8 s per EM run,
   one CPU core.
 
@@ -30,18 +32,18 @@ Measurements at n=80 (toy setting):
   false-one vs missing-one asymmetry.
 - `run_race.py` + `strategies.py` — race of generic EM initializations (cold,
   annealed, OLS start, greedy pursuit, random restarts). All fail on 19/20
-  secrets; this is the negative control for the dead-core seeding.
+  secrets; this is the negative control for the cruel-seeded attack.
 - `seeded_em.py` — single seeded-EM run for ad-hoc tests.
 - `probe_pe.py` — probes trained SALSA transformers' positional embeddings for
   secret leakage (permutation test).
 
 Diagnostics at Kyber scale (n=256, k=2, secret dimension 512):
 
-- `n256_em_test.py` — four-way seeding test at log q=12: EM from truth / dead
-  part only / strong part only / cold. Shows the mechanism transfers (dead
-  seed heals all strong coordinates) and is directional.
+- `n256_em_test.py` — four-way seeding test at log q=12: EM from truth / cruel
+  part only / cool part only / cold. Shows the mechanism transfers (cruel
+  seed heals all cool coordinates) and is directional.
 - `n256_slack_test.py` — slack test at log q=12: drop k entries from a correct
-  dead seed, count recoveries. Result: zero slack — one wrong dead entry is
+  cruel seed, count recoveries. Result: zero slack — one wrong cruel entry is
   unrecoverable, at 14.5k and 99k samples alike.
 - `n256_28_slack_test.py` — same at log q=28. Result: no high-ε band exists
   there, healing fails entirely.
