@@ -1,0 +1,4 @@
+{"step": 500, "loss": 0.5039815902709961, "heldout_match_acc": 0.009437500033527613, "heldout_within_2sigma": 0.12150000128895044, "elapsed_s": 27.7}
+{"step": 1000, "loss": 0.49978524446487427, "heldout_match_acc": 0.009625000064261258, "heldout_within_2sigma": 0.11231250036507845, "elapsed_s": 55.4}
+{"step": 1500, "loss": 0.5016061067581177, "heldout_match_acc": 0.007624999911058694, "heldout_within_2sigma": 0.11262500006705523, "elapsed_s": 83.3}
+{"step": 2000, "loss": 0.4999919533729553, "heldout_match_acc": 0.00756250019185245, "heldout_within_2sigma": 0.11406250111758709, "elapsed_s": 111.2}
